@@ -23,7 +23,7 @@ func main() {
 	mux.Handle("/api/posts", new(httphandler.PostHandler))
 
 	corHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://juhonamnam.github.io"},
+		AllowedOrigins:   []string{"https://card.juhonam.shop", "https://juhonamnam.github.io"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut},
 		AllowCredentials: true,
 	})
