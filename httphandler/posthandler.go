@@ -88,8 +88,13 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		err = sqldb.DeletePost(post.Id, post.Password)
 
 		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("InternalServerError"))
+			if err.Error() == "INCORRECT_PASSWORD" {
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte("Forbidden"))
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("InternalServerError"))
+			}
 			return
 		}
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/juhonamnam/wedding-invitation-server/types"
+	"github.com/juhonamnam/wedding-invitation-server/util"
 )
 
 func initializePostsTable() error {
@@ -87,24 +88,66 @@ func GetPosts(offset, limit int) (*types.PostsGetResponse, error) {
 }
 
 func CreatePost(name, content, password string) error {
-	_, err := sqlDb.Exec(`
+	phash, err := util.HashPassword(password)
+	if err != nil {
+		return err
+	}
+
+	result, err := sqlDb.Exec(`
 		INSERT INTO posts (name, content, password, timestamp)
 		VALUES (?, ?, ?, ?)
-	`, name, content, password, time.Now().Unix())
+	`, name, content, phash, time.Now().Unix())
 	if err != nil {
 		fmt.Println(err)
 		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return fmt.Errorf("NO_ROWS_AFFECTED")
 	}
 
 	return nil
 }
 
 func DeletePost(id int, password string) error {
+	post, err := sqlDb.Query(`
+		SELECT password
+		FROM posts
+		WHERE id = ? AND valid = TRUE
+	`, id)
+	if err != nil {
+		return err
+	}
+	defer post.Close()
+
+	phash := ""
+
+	for post.Next() {
+		err = post.Scan(&phash)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	if phash == "" {
+		return fmt.Errorf("NO_POST_FOUND")
+	}
+
+	if !util.CheckPasswordHash(password, phash) {
+		return fmt.Errorf("INCORRECT_PASSWORD")
+	}
+
 	result, err := sqlDb.Exec(`
 		UPDATE posts
 		SET valid = FALSE
-		WHERE id = ? AND password = ?
-	`, id, password)
+		WHERE id = ?
+	`, id)
 
 	if err != nil {
 		return err
@@ -116,7 +159,7 @@ func DeletePost(id int, password string) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("no rows affected")
+		return fmt.Errorf("NO_ROWS_AFFECTED")
 	}
 
 	return nil
