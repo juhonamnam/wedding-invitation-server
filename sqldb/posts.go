@@ -11,9 +11,9 @@ func initializePostsTable() error {
 	_, err := sqlDb.Exec(`
 		CREATE TABLE IF NOT EXISTS posts (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT,
-			content TEXT,
-			password TEXT,
+			name VARCHAR(20),
+			content VARCHAR(200),
+			password VARCHAR(20),
 			timestamp INTEGER,
 			valid BOOLEAN DEFAULT TRUE
 		)

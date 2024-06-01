@@ -12,6 +12,10 @@ func SetDb(db *sql.DB) {
 	if err != nil {
 		panic(err)
 	}
+	err = initializeAttendanceTable()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func GetDb() *sql.DB {
