@@ -20,11 +20,11 @@ func main() {
 	sqldb.SetDb(db)
 
 	mux := http.NewServeMux()
-	mux.Handle("/api/posts", new(httphandler.PostHandler))
+	mux.Handle("/api/guestbook", new(httphandler.GuestbookHandler))
 	mux.Handle("/api/attendance", new(httphandler.AttendanceHandler))
 
 	corHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://card.juhonam.shop", "https://juhonamnam.github.io"},
+		AllowedOrigins:   []string{"https://card.juhonam.shop", "https://juhonamnam.github.io", "http://localhost:3000"},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut},
 		AllowCredentials: true,
 	})

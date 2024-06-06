@@ -8,7 +8,7 @@ var (
 
 func SetDb(db *sql.DB) {
 	sqlDb = db
-	err := initializePostsTable()
+	err := initializeGuestbookTable()
 	if err != nil {
 		panic(err)
 	}

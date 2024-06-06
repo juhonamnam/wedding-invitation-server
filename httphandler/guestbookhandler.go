@@ -9,11 +9,11 @@ import (
 	"github.com/juhonamnam/wedding-invitation-server/types"
 )
 
-type PostHandler struct {
+type GuestbookHandler struct {
 	http.Handler
 }
 
-func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GuestbookHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 
 		offsetQ := r.URL.Query().Get("offset")
@@ -32,7 +32,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		posts, err := sqldb.GetPosts(offset, limit)
+		guestbook, err := sqldb.GetGuestbook(offset, limit)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -40,7 +40,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		pbytes, err := json.Marshal(posts)
+		pbytes, err := json.Marshal(guestbook)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -52,7 +52,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(pbytes)
 	} else if r.Method == http.MethodPost {
 		decoder := json.NewDecoder(r.Body)
-		var post types.PostCreate
+		var post types.GuestbookPostForCreate
 		err := decoder.Decode(&post)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -66,7 +66,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = sqldb.CreatePost(post.Name, post.Content, post.Password)
+		err = sqldb.CreateGuestbookPost(post.Name, post.Content, post.Password)
 
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -77,7 +77,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 	} else if r.Method == http.MethodPut {
 		decoder := json.NewDecoder(r.Body)
-		var post types.PostDelete
+		var post types.GuestbookPostForDelete
 		err := decoder.Decode(&post)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
@@ -85,7 +85,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		err = sqldb.DeletePost(post.Id, post.Password)
+		err = sqldb.DeleteGuestbookPost(post.Id, post.Password)
 
 		if err != nil {
 			if err.Error() == "INCORRECT_PASSWORD" {

@@ -1,24 +1,24 @@
 package types
 
-type PostGet struct {
+type GuestbookPostForGet struct {
 	Id        int    `json:"id"`
 	Name      string `json:"name"`
 	Content   string `json:"content"`
 	Timestamp uint64 `json:"timestamp"`
 }
 
-type PostCreate struct {
+type GuestbookPostForCreate struct {
 	Name     string `json:"name"`
 	Content  string `json:"content"`
 	Password string `json:"password"`
 }
 
-type PostDelete struct {
+type GuestbookPostForDelete struct {
 	Id       int    `json:"id"`
 	Password string `json:"password"`
 }
 
-type PostsGetResponse struct {
-	Posts []PostGet `json:"posts"`
-	Total int       `json:"total"`
+type GuestbookGetResponse struct {
+	Posts []GuestbookPostForGet `json:"posts"`
+	Total int                   `json:"total"`
 }

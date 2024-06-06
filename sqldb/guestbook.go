@@ -8,9 +8,9 @@ import (
 	"github.com/juhonamnam/wedding-invitation-server/util"
 )
 
-func initializePostsTable() error {
+func initializeGuestbookTable() error {
 	_, err := sqlDb.Exec(`
-		CREATE TABLE IF NOT EXISTS posts (
+		CREATE TABLE IF NOT EXISTS guestbook (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
 			name VARCHAR(20),
 			content VARCHAR(200),
@@ -24,8 +24,8 @@ func initializePostsTable() error {
 	}
 
 	_, err = sqlDb.Exec(`
-		CREATE INDEX IF NOT EXISTS posts_timestamp
-		ON posts (timestamp)
+		CREATE INDEX IF NOT EXISTS guestbook_timestamp
+		ON guestbook (timestamp)
 	`)
 
 	if err != nil {
@@ -33,17 +33,17 @@ func initializePostsTable() error {
 	}
 
 	_, err = sqlDb.Exec(`
-		CREATE INDEX IF NOT EXISTS posts_valid
-		ON posts (valid)
+		CREATE INDEX IF NOT EXISTS guestbook_valid
+		ON guestbook (valid)
 	`)
 
 	return err
 }
 
-func GetPosts(offset, limit int) (*types.PostsGetResponse, error) {
+func GetGuestbook(offset, limit int) (*types.GuestbookGetResponse, error) {
 	rows, err := sqlDb.Query(`
 		SELECT id, name, content, timestamp
-		FROM posts
+		FROM guestbook
 		WHERE valid = TRUE
 		ORDER BY timestamp DESC
 		LIMIT ? OFFSET ?
@@ -55,7 +55,7 @@ func GetPosts(offset, limit int) (*types.PostsGetResponse, error) {
 
 	total, err := sqlDb.Query(`
 		SELECT COUNT(*)
-		FROM posts
+		FROM guestbook
 		WHERE valid = TRUE
 	`)
 	if err != nil {
@@ -63,12 +63,12 @@ func GetPosts(offset, limit int) (*types.PostsGetResponse, error) {
 	}
 	defer total.Close()
 
-	postsGetResponse := &types.PostsGetResponse{
-		Posts: []types.PostGet{},
+	guestbookGetResponse := &types.GuestbookGetResponse{
+		Posts: []types.GuestbookPostForGet{},
 	}
 
 	for total.Next() {
-		err = total.Scan(&postsGetResponse.Total)
+		err = total.Scan(&guestbookGetResponse.Total)
 
 		if err != nil {
 			return nil, err
@@ -76,25 +76,25 @@ func GetPosts(offset, limit int) (*types.PostsGetResponse, error) {
 	}
 
 	for rows.Next() {
-		post := types.PostGet{}
-		err := rows.Scan(&post.Id, &post.Name, &post.Content, &post.Timestamp)
+		guestbookPost := types.GuestbookPostForGet{}
+		err := rows.Scan(&guestbookPost.Id, &guestbookPost.Name, &guestbookPost.Content, &guestbookPost.Timestamp)
 		if err != nil {
 			return nil, err
 		}
-		postsGetResponse.Posts = append(postsGetResponse.Posts, post)
+		guestbookGetResponse.Posts = append(guestbookGetResponse.Posts, guestbookPost)
 	}
 
-	return postsGetResponse, nil
+	return guestbookGetResponse, nil
 }
 
-func CreatePost(name, content, password string) error {
+func CreateGuestbookPost(name, content, password string) error {
 	phash, err := util.HashPassword(password)
 	if err != nil {
 		return err
 	}
 
 	result, err := sqlDb.Exec(`
-		INSERT INTO posts (name, content, password, timestamp)
+		INSERT INTO guestbook (name, content, password, timestamp)
 		VALUES (?, ?, ?, ?)
 	`, name, content, phash, time.Now().Unix())
 	if err != nil {
@@ -114,21 +114,21 @@ func CreatePost(name, content, password string) error {
 	return nil
 }
 
-func DeletePost(id int, password string) error {
-	post, err := sqlDb.Query(`
+func DeleteGuestbookPost(id int, password string) error {
+	guestbook, err := sqlDb.Query(`
 		SELECT password
-		FROM posts
+		FROM guestbook
 		WHERE id = ? AND valid = TRUE
 	`, id)
 	if err != nil {
 		return err
 	}
-	defer post.Close()
+	defer guestbook.Close()
 
 	phash := ""
 
-	for post.Next() {
-		err = post.Scan(&phash)
+	for guestbook.Next() {
+		err = guestbook.Scan(&phash)
 
 		if err != nil {
 			return err
@@ -136,7 +136,7 @@ func DeletePost(id int, password string) error {
 	}
 
 	if phash == "" {
-		return fmt.Errorf("NO_POST_FOUND")
+		return fmt.Errorf("NO_GUESTBOOK_POST_FOUND")
 	}
 
 	if !util.CheckPasswordHash(password, phash) {
@@ -144,7 +144,7 @@ func DeletePost(id int, password string) error {
 	}
 
 	result, err := sqlDb.Exec(`
-		UPDATE posts
+		UPDATE guestbook
 		SET valid = FALSE
 		WHERE id = ?
 	`, id)
