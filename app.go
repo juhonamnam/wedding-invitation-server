@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/juhonamnam/wedding-invitation-server/env"
 	"github.com/juhonamnam/wedding-invitation-server/httphandler"
 	"github.com/juhonamnam/wedding-invitation-server/sqldb"
 	_ "github.com/mattn/go-sqlite3"
@@ -20,8 +21,12 @@ func main() {
 	sqldb.SetDb(db)
 
 	mux := http.NewServeMux()
-	mux.Handle("/api/guestbook", new(httphandler.GuestbookHandler))
-	mux.Handle("/api/attendance", new(httphandler.AttendanceHandler))
+	if env.UseAttendance {
+		mux.Handle("/api/guestbook", new(httphandler.GuestbookHandler))
+	}
+	if env.UseAttendance {
+		mux.Handle("/api/attendance", new(httphandler.AttendanceHandler))
+	}
 
 	corHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"https://card.juhonam.shop", "https://juhonamnam.github.io", "http://localhost:3000"},

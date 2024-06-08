@@ -1,6 +1,9 @@
 package sqldb
 
-import "database/sql"
+import (
+	"database/sql"
+	"github.com/juhonamnam/wedding-invitation-server/env"
+)
 
 var (
 	sqlDb *sql.DB
@@ -8,13 +11,17 @@ var (
 
 func SetDb(db *sql.DB) {
 	sqlDb = db
-	err := initializeGuestbookTable()
-	if err != nil {
-		panic(err)
+	if env.UseAttendance {
+		err := initializeGuestbookTable()
+		if err != nil {
+			panic(err)
+		}
 	}
-	err = initializeAttendanceTable()
-	if err != nil {
-		panic(err)
+	if env.UseGuestbook {
+		err := initializeAttendanceTable()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 

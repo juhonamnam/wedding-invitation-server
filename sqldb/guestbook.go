@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/juhonamnam/wedding-invitation-server/env"
 	"github.com/juhonamnam/wedding-invitation-server/types"
 	"github.com/juhonamnam/wedding-invitation-server/util"
 )
@@ -115,31 +116,40 @@ func CreateGuestbookPost(name, content, password string) error {
 }
 
 func DeleteGuestbookPost(id int, password string) error {
-	guestbook, err := sqlDb.Query(`
+	passwordMatch := false
+	if env.AdminPassword != "" && env.AdminPassword == password {
+		passwordMatch = true
+	} else {
+		guestbook, err := sqlDb.Query(`
 		SELECT password
 		FROM guestbook
 		WHERE id = ? AND valid = TRUE
 	`, id)
-	if err != nil {
-		return err
-	}
-	defer guestbook.Close()
-
-	phash := ""
-
-	for guestbook.Next() {
-		err = guestbook.Scan(&phash)
-
 		if err != nil {
 			return err
 		}
+		defer guestbook.Close()
+
+		phash := ""
+
+		for guestbook.Next() {
+			err = guestbook.Scan(&phash)
+
+			if err != nil {
+				return err
+			}
+		}
+
+		if phash == "" {
+			return fmt.Errorf("NO_GUESTBOOK_POST_FOUND")
+		}
+
+		if util.CheckPasswordHash(password, phash) {
+			passwordMatch = true
+		}
 	}
 
-	if phash == "" {
-		return fmt.Errorf("NO_GUESTBOOK_POST_FOUND")
-	}
-
-	if !util.CheckPasswordHash(password, phash) {
+	if !passwordMatch {
 		return fmt.Errorf("INCORRECT_PASSWORD")
 	}
 
