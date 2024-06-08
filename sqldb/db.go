@@ -11,13 +11,13 @@ var (
 
 func SetDb(db *sql.DB) {
 	sqlDb = db
-	if env.UseAttendance {
+	if env.UseGuestbook {
 		err := initializeGuestbookTable()
 		if err != nil {
 			panic(err)
 		}
 	}
-	if env.UseGuestbook {
+	if env.UseAttendance {
 		err := initializeAttendanceTable()
 		if err != nil {
 			panic(err)

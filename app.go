@@ -21,7 +21,7 @@ func main() {
 	sqldb.SetDb(db)
 
 	mux := http.NewServeMux()
-	if env.UseAttendance {
+	if env.UseGuestbook {
 		mux.Handle("/api/guestbook", new(httphandler.GuestbookHandler))
 	}
 	if env.UseAttendance {
