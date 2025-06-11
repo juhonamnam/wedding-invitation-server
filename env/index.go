@@ -10,6 +10,7 @@ import (
 var UseGuestbook bool
 var UseAttendance bool
 var AdminPassword string
+var AllowOrigin string
 
 func init() {
 	err := godotenv.Load()
@@ -20,4 +21,5 @@ func init() {
 	UseGuestbook = os.Getenv("USE_GUESTBOOK") == "true"
 	UseAttendance = os.Getenv("USE_ATTENDANCE") == "true"
 	AdminPassword = os.Getenv("ADMIN_PASSWORD")
+	AllowOrigin = os.Getenv("ALLOW_ORIGIN")
 }

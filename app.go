@@ -29,7 +29,7 @@ func main() {
 	}
 
 	corHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://card.juhonam.shop", "https://juhonamnam.github.io", "http://localhost:3000"},
+		AllowedOrigins:   []string{env.AllowOrigin},
 		AllowedMethods:   []string{http.MethodGet, http.MethodPost, http.MethodPut},
 		AllowCredentials: true,
 	})
