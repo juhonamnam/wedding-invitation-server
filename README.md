@@ -45,7 +45,3 @@ cp .env.example .env
    ```bash
    go run app.go
    ```
-
-## 관련 프로젝트
-
-- [모바일 청첩장 (프론트엔드)](https://github.com/juhonamnam/wedding-invitation): 모바일 청첩장 웹 애플리케이션의 프론트엔드입니다.
