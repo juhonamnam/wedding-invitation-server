@@ -7,8 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var UseGuestbook bool
-var UseAttendance bool
 var AdminPassword string
 var AllowOrigin string
 
@@ -18,8 +16,6 @@ func init() {
 		fmt.Println("Error: Cannot read .env file")
 		panic(err.Error())
 	}
-	UseGuestbook = os.Getenv("USE_GUESTBOOK") == "true"
-	UseAttendance = os.Getenv("USE_ATTENDANCE") == "true"
 	AdminPassword = os.Getenv("ADMIN_PASSWORD")
 	AllowOrigin = os.Getenv("ALLOW_ORIGIN")
 }
